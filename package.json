@@ -2,7 +2,7 @@
   "name": "exportify",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://kirara2025kira-maker.github.io/exportify-2026-junio",
+  "homepage": "https://exportify.app",
   "dependencies": {
     "@bugsnag/js": "^7.25.0",
     "@bugsnag/plugin-react": "^7.25.0",
@@ -20,7 +20,7 @@
     "@types/react": "^18.3.3",
     "@types/react-bootstrap": "^0.32.37",
     "@types/react-dom": "^18.3.0",
-    "axios": "^1.7.4",
+    "axios": "^1.12.0",
     "bootstrap": "^5.3.3",
     "bottleneck": "^2.19.5",
     "eslint-plugin-jest-dom": "^5.4.0",
@@ -44,9 +44,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -81,5 +79,6 @@
   },
   "resolutions": {
     "**/fork-ts-checker-webpack-plugin": "^6.5.3"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

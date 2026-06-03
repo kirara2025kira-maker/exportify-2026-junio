@@ -1,140 +1,195 @@
-![Estado de Build](https://api.travis-ci.com/watsonbox/exportify.svg?branch=master)
-<a href="https://kirara2025kira-maker.github.io/exportify-2026-junio/"><img src="assets/screenshot.png"/></a>
+[![Build Status](https://api.travis-ci.com/watsonbox/exportify.svg?branch=master)](https://travis-ci.com/github/watsonbox/exportify)
 
-Exporta tus playlists de Spotify a **Excel (.xlsx)** haciendo clic en este enlace: [https://kirara2025kira-maker.github.io/exportify-2026-junio/](https://kirara2025kira-maker.github.io/exportify-2026-junio/).
+<a href="https://exportify.app/"><img src="assets/screenshot.png"/></a>
 
-Como muchos usuarios han notado, no hay forma de exportar/archivar/hacer copias de seguridad de las playlists desde el cliente de Spotify para su custodia. Esta aplicación proporciona una interfaz simple para hacerlo usando la [API Web de Spotify](https://developer.spotify.com/documentation/web-api/).
+Export your Spotify playlists to [XLSX](https://en.wikipedia.org/wiki/Comma-separated_values) by clicking on this link: [https://exportify.app/](https://exportify.app/).
 
-No se guardarán datos: toda la aplicación se ejecuta en el navegador.
+As many users have noted, there is no way to export/archive/backup playlists from the Spotify client for safekeeping. This application provides a simple interface for doing that using the [Spotify Web API](https://developer.spotify.com/documentation/web-api/).
 
-## Características
-⚙️ Inclusión opcional de datos de álbum, artista y características de audio en los archivos exportados  
-🔍 Búsqueda de playlists con [sintaxis de búsqueda avanzada](#sintaxis-de-búsqueda-avanzada) y exportación de resultados  
-🌓 Modo oscuro  
-🗺 Disponible en 8 idiomas (Inglés, Francés, Español, Italiano, Alemán, Portugués, Sueco y Holandés)  
-📱 Compatible con dispositivos móviles  
-ℹ Ayuda de referencia rápida  
-🚀 [Manejo avanzado de limitación de tasa](https://github.com/watsonbox/exportify/pull/75) para exportaciones rápidas  
-👩‍💻 Stack de desarrollo moderno basado en [React](#stack) + suite de pruebas  
+**No data will be saved - the entire application runs in the browser.**
 
-## Uso
-1. Abre [la aplicación](https://kirara2025kira-maker.github.io/exportify-2026-junio/)
-2. Haz clic en 'Comenzar'
-3. Otorga a Exportify acceso de solo lectura a tus playlists
-4. Haz clic en el botón 'Exportar' para exportar una playlist como archivo `.xlsx`
-5. Haz clic en 'Exportar todo' para guardar un archivo zip que contiene un archivo **Excel (.xlsx)** por cada playlist en tu cuenta. Esto puede tardar un tiempo cuando hay muchas playlists y/o son grandes.
+## Features
 
-## Reimportar Playlists
-Una vez guardadas las playlists, también es bastante sencillo volver a importarlas a Spotify. Abre el archivo **XLSX** en Excel, selecciona y copia los URIs `spotify:track:xxx`, luego simplemente crea una playlist en Spotify y pégalos. Esto solo ha sido probado con la aplicación de escritorio.
+- ⚙️ Optional inclusion of album, artist and audio features data in export files
+- 🔍 Playlist search with [advanced search syntax](#advanced-search-syntax) and results export
+- 🌓 Dark mode
+- 🗺 Available in 10 languages (English, French, Spanish, Italian, German, Portuguese, Swedish, Dutch, Japanese and Arabic)
+- 📱 Mobile friendly
+- ℹ Quick reference help
+- 🚀 [Advanced rate limiting handling](https://github.com/watsonbox/exportify/pull/75) for speedy exports
+- 👩‍💻 Modern [React-based development stack](#stack) + test suite
 
-## Formato de Exportación
-Los datos de las pistas se exportan en formato **Excel (.xlsx)** con los siguientes campos del [objeto de pista de Spotify](https://developer.spotify.com/documentation/web-api/reference/get-several-tracks):
-- URI de la pista
-- Nombre de la pista
-- URI(s) del artista
-- Nombre(s) del artista
-- URI del álbum
-- Nombre del álbum
-- URI(s) del artista del álbum
-- Nombre(s) del artista del álbum
-- Fecha de lanzamiento del álbum
-- URL de la imagen del álbum (típicamente 640x640px jpeg)
-- Número de disco
-- Número de pista
-- Duración de la pista (ms)
-- URL de vista previa de la pista (mp3)
-- ¿Explícita?
-- Popularidad
-- ISRC ([Código Internacional Estándar de Grabación](https://isrc.ifpi.org/en/))
-- Es reproducible - si la pista se puede reproducir en el [mercado del usuario](https://developer.spotify.com/documentation/web-api/concepts/track-relinking)
-- Añadido por
-- Añadido el
+## Usage
 
-Al hacer clic en el engranaje, se pueden exportar datos adicionales.
-<a href="https://kirara2025kira-maker.github.io/exportify-2026-junio/"><img src="https://user-images.githubusercontent.com/17737/100668594-72be1600-335c-11eb-90d6-c9ae873e347d.png"/></a>
+1. Fire up [the app](https://exportify.app/)
+2. Click 'Get Started'
+3. Grant Exportify read-only access to your playlists
+4. Click the 'Export' button to export a playlist
 
-Al seleccionar "Incluir datos de artistas", se añadirán los siguientes campos del [objeto de artista de Spotify](https://developer.spotify.com/documentation/web-api/reference/get-multiple-artists):
-- Géneros del artista
+Click 'Export All' to save a zip file containing a CSV file for each playlist in your account. This may take a while when many playlists exist and/or they are large.
 
-Y al seleccionar "Incluir datos de características de audio", se añadirán los siguientes campos del [objeto de características de audio de Spotify](https://developer.spotify.com/documentation/web-api/reference/get-several-audio-features):
-- Danzabilidad, Energía, Tonalidad, Volumen, Modo, Habladuría, Acústica, Instrumentalidad, Vivacidad, Valencia, Tempo, Compás
+### Re-importing Playlists
 
-Adicionalmente, al seleccionar "Incluir datos del álbum", se añadirán los siguientes campos del [objeto de álbum de Spotify (completo)](https://developer.spotify.com/documentation/web-api/reference/get-an-album):
-- Géneros del álbum, Sello discográfico, Derechos de autor
+Once playlists are saved, it's also pretty straightforward to re-import them into Spotify. Open up the CSV file in Excel, for example, select and copy the `spotify:track:xxx` URIs, then simply create a playlist in Spotify and paste them in. This has only been tested with the desktop app.
 
-*Ten en cuenta que cuantos más datos se exporten, más tiempo tardará la exportación.*
+### Export Format
 
-## Búsqueda de Playlists
-Si estás buscando una playlist específica para exportar, puedes usar la función de búsqueda para encontrarla rápidamente por nombre:
-<a href="https://kirara2025kira-maker.github.io/exportify-2026-junio/"><img src="https://user-images.githubusercontent.com/17737/100201109-eb0d7d00-2eff-11eb-993e-7ed955e2361c.gif"/></a>
+Track data is exported in [UTF-8](https://en.wikipedia.org/wiki/UTF-8) encoded [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) format with the following fields from the [Spotify track object](https://developer.spotify.com/documentation/web-api/reference/get-several-tracks):
 
-La búsqueda no distingue entre mayúsculas y minúsculas. Los resultados de búsqueda se pueden exportar como archivo zip haciendo clic en "Exportar resultados".
+- Track URI
+- Track Name
+- Artist URI(s)
+- Artist Name(s)
+- Album URI
+- Album Name
+- Album Artist URI(s)
+- Album Artist Name(s)
+- Album Release Date
+- Album Image URL (typically 640x640px jpeg)
+- Disc Number
+- Track Number
+- Track Duration (ms)
+- Track Preview URL (mp3)
+- Explicit?
+- Popularity
+- ISRC ([International Standard Recording Code](https://isrc.ifpi.org/en/))
+- Added By
+- Added At
 
-> [!WARNING]  
-> Ten en cuenta que si tienes un número muy grande de playlists, puede haber un pequeño retraso antes de que aparezcan los primeros resultados de búsqueda, ya que la API de Spotify no permite buscar directamente, por lo que todas las playlists deben ser recuperadas primero.
+By clicking on the cog, additional data can be exported.
 
-### Sintaxis de Búsqueda Avanzada
-Ciertas consultas de búsqueda tienen un significado especial:
+<a href="https://watsonbox.github.io/exportify/"><img src="https://user-images.githubusercontent.com/17737/100668594-72be1600-335c-11eb-90d6-c9ae873e347d.png"/></a>
 
-| Consulta de búsqueda | Significado |
-| --- | --- |
-| `public:true` | Solo mostrar playlists públicas |
-| `public:false` | Solo mostrar playlists privadas |
-| `collaborative:true` | Solo mostrar playlists colaborativas |
-| `collaborative:false` | No mostrar playlists colaborativas |
-| `owner:me` | Solo mostrar playlists que poseo |
-| `owner:[propietario]` | Solo mostrar playlists propiedad de `[propietario]` |
+By selecting "Include artists data", the following fields will be added from the [Spotify artist object](https://developer.spotify.com/documentation/web-api/reference/get-multiple-artists):
 
-## Desarrollo
-Este proyecto fue inicializado con [Create React App](https://github.com/facebook/create-react-app).
+- Artist Genres
 
-En el directorio del proyecto, primero ejecuta `npm install` para configurar las dependencias, luego puedes ejecutar:
+And by selecting "Include audio features data", the following fields will be added from the [Spotify audio features object](https://developer.spotify.com/documentation/web-api/reference/get-several-audio-features):
 
-`npm start`  
-Ejecuta la aplicación en modo de desarrollo.  
-Abre [http://localhost:3000](http://localhost:3000) para verla en el navegador.  
-La página se recargará si haces ediciones. También verás cualquier error de lint en la consola.
+- Danceability
+- Energy
+- Key
+- Loudness
+- Mode
+- Speechiness
+- Acousticness
+- Instrumentalness
+- Liveness
+- Valence
+- Tempo
+- Time Signature
 
-`npm test`  
-Inicia el ejecutor de pruebas en el modo interactivo de observación.
+Additionally, by selecting "Include album data", the following fields will be added from the [Spotify album object (full)](https://developer.spotify.com/documentation/web-api/reference/get-an-album)
 
-`npm run build`  
-Construye la aplicación para producción en la carpeta `build`.
+- Album Genres
+- Label
+- Copyrights
 
-`npm run deploy`  
-Despliega la aplicación en GitHub Pages.
+Note that the more data being exported, the longer the export will take.
 
-## Stack
-Además de [Create React App](https://github.com/facebook/create-react-app), la aplicación está construida usando las siguientes herramientas/librerías:
-- [React](https://reactjs.org/) - Una librería de JavaScript para construir interfaces de usuario
-- [Bootstrap 5](https://getbootstrap.com/) - Estilos y componentes de UI
-- [Font Awesome 6](https://fontawesome.com/) - Conjunto de iconos vectoriales y toolkit
-- [react-i18next](https://react.i18next.com/) - Framework de internacionalización
-- [SheetJS (xlsx)](https://sheetjs.com/) - Generación de archivos Excel del lado del cliente
-- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) - Solución ligera para probar nodos DOM de React
-- [MSW](https://mswjs.io/) - Simulación de peticiones a nivel de red
+### Playlist Search
 
-## Historial
-- **2015**: Exportify [nace](https://github.com/watsonbox/exportify/commit/b284822e12c3adea8fb83258fdb00ec4690701e1)
-- **2020**: [Lanzamiento importante](https://watsonbox.github.io/posts/2020/12/02/exportify-refresh.html) incluyendo búsqueda, artistas y características de audio, exportación de canciones favoritas, y un nuevo sistema de limitación de tasa
-- **2024**: [Lanzamiento importante](https://watsonbox.github.io/posts/2024/09/04/exportify-updates.html) incluyendo modo oscuro, internacionalización y mejoras de búsqueda
-- **2026**: Fork personalizado con exportación a **Excel (.xlsx)** y despliegue en GitHub Pages
+If you're searching for a specific playlist to export, you can use the search facility to find it quickly by name:
 
-## Notas
-Según la [documentación](https://developer.spotify.com/web-api/working-with-playlists/) de Spotify: *"Las carpetas no se devuelven a través de la API Web en este momento, ni se pueden crear usándola"*. Lamentablemente, así es como es.
+<a href="https://watsonbox.github.io/exportify/"><img src="https://user-images.githubusercontent.com/17737/100201109-eb0d7d00-2eff-11eb-993e-7ed955e2361c.gif"/></a>
 
-He [hecho todo lo posible](https://github.com/watsonbox/exportify/pull/75) para intentar eliminar los errores resultantes del uso excesivo de la API de Spotify. Sin embargo, exportar datos en masa es un proceso bastante intensivo en peticiones, así que por favor intenta usar esta herramienta de manera responsable. Si necesitas más capacidad, considera [crear tu propia aplicación de Spotify](https://github.com/watsonbox/exportify/issues/6#issuecomment-110793132) que puedas usar directamente con Exportify.
+- Searching is _case-insensitive_.
+- Search results can be exported as a zip file by clicking "Export Results"
 
-*Descargo de responsabilidad: Debería estar claro, pero este proyecto no está afiliado con Spotify de ninguna manera. Es solo una aplicación que usa su API como cualquier otra, con un nombre y logo atrevidos 😇.*
+> [!WARNING]
+> Please be aware that if you have a very large number of playlists, there may be a small delay before the first search results appear since the Spotify API itself doesn't allow for searching directly, so all playlists must be retrieved first.
 
-En caso de que no veas las playlists que esperabas ver y te des cuenta de que las has eliminado accidentalmente, en realidad es posible [recuperarlas](https://support.spotify.com/us/article/can-i-recover-a-deleted-playlist/).
+#### Advanced Search Syntax
 
-## Monitoreo de Errores
-Monitoreo de errores proporcionado por Bugsnag.  
-<a href="http://www.bugsnag.com"><img src="assets/bugsnag.png" width="200" /></a>
+Certain search queries have special meaning:
 
-## Ejecutar con Docker
-Para construir y ejecutar Exportify con docker, ejecuta:
-```bash
-docker build . -t exportify
-docker run -p 3000:3000 exportify
+| Search query | Meaning |
+|----|----|
+| `public:true` | Only show public playlists |
+| `public:false` | Only show private playlists |
+| `collaborative:true` | Only show collaborative playlists |
+| `collaborative:false` | Don't show collaborative playlists |
+| `owner:me` | Only show playlists I own |
+| `owner:[owner]` | Only show playlists owned by `[owner]` |
+
+
+## Development
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+In the project directory, first run `yarn install` to set up dependencies, then you can run:
+
+**`yarn start`**
+
+Runs the app in the development mode.\
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000) to view it in the browser.
+
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
+
+**`yarn test`**
+
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+**`yarn build`**
+
+Builds the app for production to the `build` folder.
+
+### Stack
+
+In addition to [Create React App](https://github.com/facebook/create-react-app), the application is built using the following tools/libraries:
+
+* [React](https://reactjs.org/) - A JavaScript library for building user interfaces
+* [Bootstrap 5](https://getbootstrap.com/) - styling and UI components
+* [Font Awesome 6](https://fontawesome.com/) - vector icon set and toolkit
+* [react-i18next](https://react.i18next.com/) - internationalization framework
+* [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) - light-weight solution for testing React DOM nodes
+* [MSW](https://mswjs.io/) - network-level request mocking (more of my own thoughts [here](https://watsonbox.github.io/posts/2020/11/30/discovering-msw.html))
+
+### History
+
+- 2015: Exportify is [born](https://github.com/watsonbox/exportify/commit/b284822e12c3adea8fb83258fdb00ec4690701e1)
+- 2020: [Major release](https://watsonbox.github.io/posts/2020/12/02/exportify-refresh.html) including search, artist and audio features, liked songs export, and a new rate limiting system
+- 2024: [Major release](https://watsonbox.github.io/posts/2024/09/04/exportify-updates.html) including dark mode, internationalization, and search enhancements
+
+## Notes
+
+- According to Spotify's [documentation](https://developer.spotify.com/web-api/working-with-playlists/):
+
+  > Folders are not returned through the Web API at the moment, nor can be created using it".
+
+  Unfortunately that's just how it is.
+
+- I've [gone to some lengths](https://github.com/watsonbox/exportify/pull/75) to try to eliminate errors resulting from excessively high usage of the Spotify API. Nonetheless, exporting data in bulk is a fairly request-intensive process, so please do try to use this tool responsibly. If you do require more throughput, please consider [creating your own Spotify application](https://github.com/watsonbox/exportify/issues/6#issuecomment-110793132) which you can use with Exportify directly.
+
+- Disclaimer: It should be clear, but this project is not affiliated with Spotify in any way. It's just an app using their API like any other, with a cheeky name and logo 😇.
+
+- In case you don't see the playlists you were expecting to see and realize you've accidentally deleted them, it's actually possible to [recover them](https://support.spotify.com/us/article/can-i-recover-a-deleted-playlist/).
+
+
+## Error Monitoring
+
+Error monitoring provided by Bugsnag.
+
+<a href="http://www.bugsnag.com">
+  <img src="assets/bugsnag.png" width="200" />
+</a>
+
+## Running With Docker
+
+To build and run Exportify with docker, run:
+
+**`docker build . -t exportify`**
+
+**`docker run -p 3000:3000 exportify`**
+
+And then open [http://127.0.0.1:3000](http://127.0.0.1:3000) to view it in the browser.
+
+## Contributing
+
+1. Fork it ( https://github.com/watsonbox/exportify/fork )
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
