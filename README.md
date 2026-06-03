@@ -2,7 +2,7 @@
 
 <a href="https://exportify.app/"><img src="assets/screenshot.png"/></a>
 
-Export your Spotify playlists to [XLSX](https://en.wikipedia.org/wiki/Comma-separated_values) by clicking on this link: [https://exportify.app/](https://exportify.app/).
+Export your Spotify playlists to [XLSX](https://en.wikipedia.org/wiki/Comma-separated_values) by clicking on this link: [https://exportify.app/](http://127.0.0.1:3000/).
 
 As many users have noted, there is no way to export/archive/backup playlists from the Spotify client for safekeeping. This application provides a simple interface for doing that using the [Spotify Web API](https://developer.spotify.com/documentation/web-api/).
 
