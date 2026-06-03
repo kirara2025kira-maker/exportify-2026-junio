@@ -34,22 +34,16 @@ Once playlists are saved, it's also pretty straightforward to re-import them int
 
 ### Export Format
 
-Track data is exported in [UTF-8](https://en.wikipedia.org/wiki/UTF-8) encoded [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) format with the following fields from the [Spotify track object](https://developer.spotify.com/documentation/web-api/reference/get-several-tracks):
+Track data is exported in [UTF-8](https://en.wikipedia.org/wiki/UTF-8) encoded XLSX format with the following fields from the [Spotify track object](https://developer.spotify.com/documentation/web-api/reference/get-several-tracks):
 
-- Track URI
 - Track Name
-- Artist URI(s)
 - Artist Name(s)
-- Album URI
 - Album Name
-- Album Artist URI(s)
 - Album Artist Name(s)
 - Album Release Date
-- Album Image URL (typically 640x640px jpeg)
 - Disc Number
 - Track Number
 - Track Duration (ms)
-- Track Preview URL (mp3)
 - Explicit?
 - Popularity
 - ISRC ([International Standard Recording Code](https://isrc.ifpi.org/en/))
