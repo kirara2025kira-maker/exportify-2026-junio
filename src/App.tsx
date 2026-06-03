@@ -31,6 +31,9 @@ function App() {
         
         if (codeVerifier) {
           try {
+            // ?? IMPORTANTE: Usar la misma redirect_uri que en Login.tsx
+            const redirectUri = window.location.origin + window.location.pathname;
+            
             // Intercambiar el código por un access_token
             const response = await fetch('https://accounts.spotify.com/api/token', {
               method: 'POST',
@@ -40,8 +43,8 @@ function App() {
               body: new URLSearchParams({
                 grant_type: 'authorization_code',
                 code: code,
-                redirect_uri: window.location.origin + window.location.pathname,
-                client_id: '2c8e4d6d067648c4a95095f20b508cc6', // Tu Client ID
+                redirect_uri: redirectUri,
+                client_id: '2c8e4d6d067648c4a95095f20b508cc6',
                 code_verifier: codeVerifier,
               }),
             })
@@ -56,10 +59,16 @@ function App() {
               // Limpiar el parámetro 'code' de la URL sin recargar
               const newUrl = window.location.origin + window.location.pathname
               window.history.replaceState({}, document.title, newUrl)
+            } else if (data.error) {
+              console.error('Error from Spotify:', data.error, data.error_description)
+              // Si hay error, limpiar y mostrar mensaje
+              localStorage.removeItem('code_verifier')
             }
           } catch (error) {
             console.error('Error exchanging code for token:', error)
           }
+        } else {
+          console.error('No code_verifier found in localStorage')
         }
       }
       setIsLoading(false)
@@ -72,6 +81,8 @@ function App() {
     if (legacyToken) {
       setAccessToken(legacyToken)
       setIsLoading(false)
+      // Limpiar el hash de la URL
+      window.history.replaceState({}, document.title, window.location.pathname)
     } else if (code) {
       exchangeCodeForToken()
     } else {
@@ -88,7 +99,7 @@ function App() {
   } else if (isLoading) {
     // Mostrar estado de carga mientras se intercambia el código
     view = <div className="text-center">
-      <p>Loading...</p>
+      <p><FontAwesomeIcon icon={['fas', 'spinner']} spin /> Loading...</p>
     </div>
   } else if (accessToken) {
     view = <PlaylistTable accessToken={accessToken} onSetSubtitle={onSetSubtitle} />
