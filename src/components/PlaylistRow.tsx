@@ -51,7 +51,7 @@ class PlaylistRow extends React.Component<PlaylistRowProps> {
 
   render() {
     let playlist = this.props.playlist
-    const icon = ['fas', (this.state.exporting ? 'sync' : 'download')]
+    const icon: any = this.state.exporting ? ['fas', 'sync'] : ['fas', 'download']
 
     if (playlist.uri == null) return (
       <tr key={this.props.key}>
@@ -61,7 +61,7 @@ class PlaylistRow extends React.Component<PlaylistRowProps> {
         <td className="d-none d-sm-table-cell">{this.renderTickCross(playlist.public)}</td>
         <td className="d-none d-md-table-cell">{this.renderTickCross(playlist.collaborative)}</td>
         <td>&nbsp;</td>
-      </tr >
+      </tr>
     );
 
     return (
@@ -73,10 +73,17 @@ class PlaylistRow extends React.Component<PlaylistRowProps> {
         <td className="d-none d-sm-table-cell">{this.renderTickCross(playlist.public)}</td>
         <td className="d-none d-md-table-cell">{this.renderTickCross(playlist.collaborative)}</td>
         <td className="text-end">
-          {/* @ts-ignore */}
-          <Button type="submit" variant="primary" size="xs" onClick={this.exportPlaylist} disabled={this.state.exporting} className="text-nowrap">
-            {/* @ts-ignore */}
-            <FontAwesomeIcon icon={icon} size="sm" spin={this.state.exporting} /> {this.props.i18n.t("playlist.export")}
+          <Button 
+            type="submit" 
+            variant="primary" 
+            size="sm"
+            onClick={this.exportPlaylist} 
+            disabled={this.state.exporting} 
+            className="text-nowrap"
+            title={this.state.exporting ? "Exportando a XLSX..." : "Exportar a XLSX"}
+          >
+            <FontAwesomeIcon icon={icon} size="sm" spin={this.state.exporting} /> 
+            {this.state.exporting ? "Exportando..." : "Exportar"}
           </Button>
         </td>
       </tr>

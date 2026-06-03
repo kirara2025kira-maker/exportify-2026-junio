@@ -18,7 +18,6 @@ interface PlaylistsExporterProps extends WithTranslation {
   onPlaylistsExportDone: () => void
 }
 
-// Handles exporting all playlist data as a zip file
 class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
   state = {
     exporting: false
@@ -26,8 +25,7 @@ class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
 
   async export(accessToken: string, playlistsData: PlaylistsData, searchQuery: string, config: any) {
     let playlistFileNames = new Set<string>()
-    // CAMBIO: Ahora guardaremos los Blobs de Excel en lugar de strings CSV
-    let playlistBlobExports = new Array<Blob>() 
+    let playlistXlsxExports = new Array<Uint8Array>()
 
     const playlists = searchQuery === "" ? await playlistsData.all() : await playlistsData.search(searchQuery)
 
@@ -37,19 +35,15 @@ class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
       this.props.onPlaylistExportStarted(playlist.name, doneCount)
 
       let exporter = new PlaylistExporter(accessToken, playlist, config)
-      
-      // CAMBIO: Llamamos al nuevo método getBlob() que genera el archivo .xlsx en memoria
-      let blob = await exporter.getBlob() 
-      
+      let xlsxData = await exporter.xlsxData()
       let fileName = exporter.fileName(false)
 
-      // Manejo de nombres de archivo duplicados
       for (let i = 1; playlistFileNames.has(fileName + exporter.fileExtension()); i++) {
         fileName = exporter.fileName(false) + ` (${i})`
       }
 
       playlistFileNames.add(fileName + exporter.fileExtension())
-      playlistBlobExports.push(blob) // Guardamos el Blob
+      playlistXlsxExports.push(xlsxData)
 
       doneCount++
     }
@@ -58,9 +52,8 @@ class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
 
     var zip = new JSZip()
 
-    // CAMBIO: JSZip puede recibir el Blob directamente como segundo parámetro
     Array.from(playlistFileNames).forEach(function (fileName, i) {
-      zip.file(fileName, playlistBlobExports[i])
+      zip.file(fileName, playlistXlsxExports[i])
     })
 
     zip.generateAsync({ type: "blob" }).then(function (content) {
@@ -87,10 +80,18 @@ class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
   render() {
     const text = this.props.searchQuery === "" ? this.props.i18n.t("export_all") : this.props.i18n.t("export_search_results")
 
-    // @ts-ignore
-    return <Button type="submit" variant="outline-secondary" size="xs" onClick={this.exportPlaylists} className="text-nowrap" disabled={this.state.exporting} >
-      <FontAwesomeIcon icon={['far', 'file-archive']} /> {text}
-    </Button >
+    return (
+      <Button 
+        type="submit" 
+        variant="outline-secondary" 
+        size="sm"
+        onClick={this.exportPlaylists} 
+        className="text-nowrap" 
+        disabled={this.state.exporting}
+      >
+        <FontAwesomeIcon icon={['far', 'file-archive']} /> {text}
+      </Button>
+    )
   }
 }
 

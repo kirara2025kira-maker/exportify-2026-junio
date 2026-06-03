@@ -1,6 +1,6 @@
 import { saveAs } from "file-saver"
+import * as XLSX from 'xlsx'
 import i18n from "../i18n/config"
-import * as XLSX from 'xlsx'; // <-- NUEVO: Importamos la librería de Excel
 
 import TracksData from "components/data/TracksData"
 import TracksBaseData from "components/data/TracksBaseData"
@@ -8,7 +8,7 @@ import TracksArtistsData from "components/data/TracksArtistsData"
 import TracksAudioFeaturesData from "components/data/TracksAudioFeaturesData"
 import TracksAlbumData from "components/data/TracksAlbumData"
 
-class TracksCsvFile {
+class TracksXlsxFile {
   playlist: any
   trackItems: any
   columnNames: string[]
@@ -16,6 +16,12 @@ class TracksCsvFile {
 
   lineTrackUris: string[]
   lineTrackData: string[][]
+
+  // Palabras clave para excluir (en cualquier idioma)
+  private static readonly EXCLUDED_KEYWORDS: string[] = [
+    "URI",
+    "uri"
+  ]
 
   constructor(playlist: any, trackItems: any) {
     this.playlist = playlist
@@ -33,34 +39,83 @@ class TracksCsvFile {
     ])
   }
 
-  async addData(tracksData: TracksData, before = false) {
+  // Verificar si una columna debe ser excluida
+  private shouldExcludeColumn(columnName: string): boolean {
+    // Excluir si contiene alguna palabra clave
+    for (const keyword of TracksXlsxFile.EXCLUDED_KEYWORDS) {
+      if (columnName.includes(keyword)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  async addData(tracksData: TracksData, before: boolean = false) {
+    const allLabels = tracksData.dataLabels()
+    
+    // Filtrar columnas que contengan palabras clave de exclusiÃ³n
+    const filteredLabels: string[] = []
+    const filteredIndices: number[] = []
+    
+    // Guardar los Ã­ndices de las columnas que NO se excluyen
+    allLabels.forEach((label: string, idx: number) => {
+      if (!this.shouldExcludeColumn(label)) {
+        filteredLabels.push(label)
+        filteredIndices.push(idx)
+      }
+    })
+    
+    // Agregar nombres de columnas filtrados
     if (before) {
-      this.columnNames.unshift(...tracksData.dataLabels())
+      this.columnNames.unshift(...filteredLabels)
     } else {
-      this.columnNames.push(...tracksData.dataLabels())
+      this.columnNames.push(...filteredLabels)
     }
 
     const data: Map<string, string[]> = await tracksData.data()
 
     this.lineTrackUris.forEach((uri: string, index: number) => {
       if (data.has(uri)) {
+        const values = data.get(uri)!
+        
+        // Extraer solo los valores de las columnas no excluidas
+        const filteredValues = filteredIndices.map((idx: number) => values[idx] || '')
+        
         if (before) {
-          this.lineTrackData[index].unshift(...data.get(uri)!)
+          this.lineTrackData[index].unshift(...filteredValues)
         } else {
-          this.lineTrackData[index].push(...data.get(uri)!)
+          this.lineTrackData[index].push(...filteredValues)
         }
       }
     })
   }
 
-  // CAMBIO: En lugar de generar un string CSV, devolvemos un "Array of Arrays" (AOA)
-  // que es el formato nativo que XLSX necesita para crear la hoja de cálculo.
-  getExportData(): any[][] {
-    return [this.columnNames, ...this.lineTrackData];
+  content(): Uint8Array {
+    // Convertir los datos a formato de objetos para SheetJS
+    const rows = this.lineTrackData.map((rowData, index) => {
+      const row: any = {};
+      this.columnNames.forEach((colName, colIndex) => {
+        row[colName] = rowData[colIndex] || '';
+      });
+      return row;
+    });
+
+    // Crear hoja de cÃ¡lculo
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    
+    // Ajustar anchos de columnas
+    const maxWidths = this.columnNames.map(colName => ({
+      wch: Math.min(Math.max(colName.length, 15), 50)
+    }));
+    worksheet['!cols'] = maxWidths;
+    
+    // Crear libro
+    const workbook = XLSX.utils.book_new();
+    const sheetName = (this.playlist.name || 'Playlist').slice(0, 31);
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    
+    return XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
   }
-  
-  // NOTA: Los métodos content() y sanitize() ya no son necesarios 
-  // porque XLSX maneja el formato y los tipos de datos internamente.
 }
 
 // Handles exporting a single playlist as an XLSX file
@@ -76,63 +131,42 @@ class PlaylistExporter {
   }
 
   async export() {
-    const blob = await this.getBlob()
-    saveAs(blob, this.fileName())
-  }
-
-  // NUEVO: Método que genera el Blob de Excel. 
-  // Lo he separado para que sea fácil de usar si tienes un exportador de ZIP.
-  async getBlob(): Promise<Blob> {
-    const data = await this.excelData()
-    
-    // 1. Creamos la hoja de cálculo a partir del Array of Arrays
-    const worksheet = XLSX.utils.aoa_to_sheet(data)
-    const workbook = XLSX.utils.book_new()
-    
-    // 2. Limitamos el nombre de la hoja a 31 caracteres (límite de Excel) y limpiamos caracteres inválidos
-    const sheetName = this.playlist.name.substring(0, 31).replace(/[:\\/?*[\]]/g, "")
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName || "Playlist")
-
-    // 3. Generamos el buffer binario del archivo Excel
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-    
-    // 4. Creamos el Blob con el tipo MIME correcto para archivos .xlsx
-    return new Blob([excelBuffer], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    return this.xlsxData().then((data) => {
+      var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+      saveAs(blob, this.fileName(), { autoBom: false })
     })
   }
 
-  // Renombrado de csvData a excelData para reflejar el nuevo formato
-  async excelData() {
+  async xlsxData() {
     const tracksBaseData = new TracksBaseData(this.accessToken, this.playlist)
     const items = await tracksBaseData.trackItems()
     const tracks = items.map(i => i.track)
-    const tracksCsvFile = new TracksCsvFile(this.playlist, items)
+    const tracksXlsxFile = new TracksXlsxFile(this.playlist, items)
 
     // Add base data before existing (item) data, for backward compatibility
-    await tracksCsvFile.addData(tracksBaseData, true)
+    await tracksXlsxFile.addData(tracksBaseData, true)
 
     if (this.config.includeArtistsData) {
-      await tracksCsvFile.addData(new TracksArtistsData(this.accessToken, tracks))
+      await tracksXlsxFile.addData(new TracksArtistsData(this.accessToken, tracks))
     }
 
     if (this.config.includeAudioFeaturesData) {
-      await tracksCsvFile.addData(new TracksAudioFeaturesData(this.accessToken, tracks))
+      await tracksXlsxFile.addData(new TracksAudioFeaturesData(this.accessToken, tracks))
     }
 
     if (this.config.includeAlbumData) {
-      await tracksCsvFile.addData(new TracksAlbumData(this.accessToken, tracks))
+      await tracksXlsxFile.addData(new TracksAlbumData(this.accessToken, tracks))
     }
 
-    return tracksCsvFile.getExportData() // Devuelve el Array of Arrays
+    return tracksXlsxFile.content()
   }
 
-  fileName(withExtension = true): string {
-    return this.playlist.name.replace(/[\x00-\x1F\x7F/\\<>:;"|=,.?*[\] ]+/g, "_").toLowerCase() + (withExtension ? this.fileExtension() : "") // eslint-disable-line no-control-regex
+  fileName(withExtension: boolean = true): string {
+    return this.playlist.name.replace(/[\x00-\x1F\x7F/\\<>:;"|=,.?*[\] ]+/g, "_").toLowerCase() + (withExtension ? this.fileExtension() : "")
   }
 
   fileExtension(): string {
-    return ".xlsx" // CAMBIO: Ahora devuelve .xlsx
+    return ".xlsx"
   }
 }
 

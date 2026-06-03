@@ -17,6 +17,9 @@ i18n
       en: {
         translations: require('./locales/en/translation.json')
       },
+      el: {
+        translations: require('./locales/el/translation.json')
+      },
       es: {
         translations: require('./locales/es/translation.json')
       },
@@ -34,6 +37,15 @@ i18n
       },
       sv: {
         translations: require('./locales/sv/translation.json')
+      },
+      ar: {
+        translations: require('./locales/ar/translation.json')
+      },
+      ja: {
+        translations: require('./locales/ja/translation.json')
+      },
+      tr: {
+        translations: require('./locales/tr/translation.json')
       }
     },
     ns: ['translations'],

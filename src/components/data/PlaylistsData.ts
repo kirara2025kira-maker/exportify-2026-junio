@@ -64,7 +64,7 @@ class PlaylistsData {
       let owner = query.match(/owner:(.*)/)?.at(-1)?.toLowerCase()
       if (owner === "me") owner = this.userId
 
-      return results.filter(p => p.owner).filter(p => p.owner.display_name.toLowerCase() === owner)
+      return results.filter(p => p.owner).filter(p => p.owner.id === owner)
     } else {
       // Case-insensitive search in playlist name
       // TODO: Add lazy evaluation for performance?
@@ -115,7 +115,7 @@ class PlaylistsData {
       return
     }
 
-    const likedTracksUrl = `https://api.spotify.com/v1/users/${this.userId}/tracks`
+    const likedTracksUrl = `https://api.spotify.com/v1/me/tracks`
     const likedTracksResponse = await apiCall(likedTracksUrl, this.accessToken)
     const likedTracksData = likedTracksResponse.data
 

@@ -2,6 +2,7 @@ import React from "react"
 import { withTranslation, WithTranslation, Trans } from "react-i18next"
 import { Button, Modal, Table, Dropdown, Form } from "react-bootstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { logout } from "auth"
 
 interface TopMenuProps extends WithTranslation {
   loggedIn: boolean
@@ -17,7 +18,7 @@ class TopMenu extends React.Component<TopMenuProps> {
   }
 
   handleLogoutClick = () => {
-    window.location.href = `${window.location.href.split('#')[0]}?change_user=true`
+    logout(true)
   }
 
   handleDarkModeClick = () => {
@@ -49,6 +50,14 @@ class TopMenu extends React.Component<TopMenuProps> {
     this.setTheme(this.getPreferredTheme())
   }
 
+  renderLanguageDropdownItem = (language: string, label: string) => (
+    <Dropdown.Item onClick={() => this.handleLanguageSwitch(language)}>
+      <Form.Check type="radio" name="language">
+        <FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === language ? 'me-1 selected' : 'me-1'} /> {label}
+      </Form.Check>
+    </Dropdown.Item>
+  )
+
   render() {
     const helpButton = this.props.loggedIn ? (
       <>
@@ -75,7 +84,7 @@ class TopMenu extends React.Component<TopMenuProps> {
                 </tr>
                 <tr>
                   <td><code>public:false</code></td>
-                  <td>{this.props.i18n.t("help.search_syntax.public_true")}</td>
+                  <td>{this.props.i18n.t("help.search_syntax.public_false")}</td>
                 </tr>
                 <tr>
                   <td><code>collaborative:true</code></td>
@@ -118,30 +127,18 @@ class TopMenu extends React.Component<TopMenuProps> {
             <FontAwesomeIcon icon={['fas', 'globe']} />
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("en")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "en" ? 'me-1 selected' : 'me-1'} /> English</Form.Check>
-            </Dropdown.Item>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("de")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "de" ? 'me-1 selected' : 'me-1'} /> Deutsch</Form.Check>
-            </Dropdown.Item>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("es")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "es" ? 'me-1 selected' : 'me-1'} /> Español</Form.Check>
-            </Dropdown.Item>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("fr")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "fr" ? 'me-1 selected' : 'me-1'} /> Français</Form.Check>
-            </Dropdown.Item>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("it")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "it" ? 'me-1 selected' : 'me-1'} /> Italiano</Form.Check>
-            </Dropdown.Item>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("nl")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "nl" ? 'me-1 selected' : 'me-1'} /> Nederlands</Form.Check>
-            </Dropdown.Item>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("pt")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "pt" ? 'me-1 selected' : 'me-1'} /> Português</Form.Check>
-            </Dropdown.Item>
-            <Dropdown.Item onClick={(event) => this.handleLanguageSwitch("sv")}>
-              <Form.Check type="radio" name="language"><FontAwesomeIcon icon={['fas', 'check']} className={this.props.i18n.language === "sv" ? 'me-1 selected' : 'me-1'} /> Svenska</Form.Check>
-            </Dropdown.Item>
+            {this.renderLanguageDropdownItem("en", "English")}
+            {this.renderLanguageDropdownItem("de", "Deutsch")}
+            {this.renderLanguageDropdownItem("el", "Ελληνικά")}
+            {this.renderLanguageDropdownItem("es", "Español")}
+            {this.renderLanguageDropdownItem("fr", "Français")}
+            {this.renderLanguageDropdownItem("it", "Italiano")}
+            {this.renderLanguageDropdownItem("nl", "Nederlands")}
+            {this.renderLanguageDropdownItem("pt", "Português")}
+            {this.renderLanguageDropdownItem("sv", "Svenska")}
+            {this.renderLanguageDropdownItem("ar", "العربية")}
+            {this.renderLanguageDropdownItem("ja", "日本語")}
+            {this.renderLanguageDropdownItem("tr", "Türkçe")}
           </Dropdown.Menu>
         </Dropdown>
         {logoutButton}
