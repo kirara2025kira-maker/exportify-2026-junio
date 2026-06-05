@@ -2,7 +2,6 @@ import React from "react"
 import { withTranslation, WithTranslation } from "react-i18next"
 import { Button } from "react-bootstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-
 import { apiCallErrorHandler } from "helpers"
 import PlaylistExporter from "./PlaylistExporter"
 
@@ -10,7 +9,9 @@ interface PlaylistRowProps extends WithTranslation {
   accessToken: string,
   key: string,
   playlist: any,
-  config: any
+  config: any,
+  isSelected: boolean,
+  onToggleSelect: (playlistId: string) => void
 }
 
 class PlaylistRow extends React.Component<PlaylistRowProps> {
@@ -52,10 +53,14 @@ class PlaylistRow extends React.Component<PlaylistRowProps> {
   render() {
     let playlist = this.props.playlist
     const icon: any = this.state.exporting ? ['fas', 'sync'] : ['fas', 'download']
+    const canSelect = playlist.uri != null
 
     if (playlist.uri == null) return (
       <tr key={this.props.key}>
-        <td>{this.renderIcon(playlist)}</td>
+        <td className="icon d-flex align-items-center gap-2">
+          <input type="checkbox" disabled={true} />
+          {this.renderIcon(playlist)}
+        </td>
         <td>{playlist.name}</td>
         <td className="d-none d-sm-table-cell" colSpan={2}>{this.props.i18n.t("playlist.not_supported")}</td>
         <td className="d-none d-sm-table-cell">{this.renderTickCross(playlist.public)}</td>
@@ -66,7 +71,14 @@ class PlaylistRow extends React.Component<PlaylistRowProps> {
 
     return (
       <tr key={this.props.key}>
-        <td>{this.renderIcon(playlist)}</td>
+        <td className="icon d-flex align-items-center gap-2">
+          <input 
+            type="checkbox" 
+            checked={this.props.isSelected}
+            onChange={() => this.props.onToggleSelect(this.props.playlist.id)}
+          />
+          {this.renderIcon(playlist)}
+        </td>
         <td><a href={playlist.uri}>{playlist.name}</a></td>
         <td><a href={playlist.owner.uri}>{playlist.owner.display_name}</a></td>
         <td className="d-none d-sm-table-cell">{playlist.tracks.total}</td>

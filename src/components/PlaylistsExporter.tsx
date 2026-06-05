@@ -4,7 +4,6 @@ import { Button } from "react-bootstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { saveAs } from "file-saver"
 import JSZip from "jszip"
-
 import PlaylistExporter from "./PlaylistExporter"
 import { apiCallErrorHandler } from "helpers"
 import PlaylistsData from "./data/PlaylistsData"
@@ -14,6 +13,7 @@ interface PlaylistsExporterProps extends WithTranslation {
   playlistsData: PlaylistsData
   searchQuery: string
   config: any
+  selectedPlaylists: Set<string>
   onPlaylistExportStarted: (playlistName: string, doneCount: number) => void
   onPlaylistsExportDone: () => void
 }
@@ -23,15 +23,19 @@ class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
     exporting: false
   }
 
-  async export(accessToken: string, playlistsData: PlaylistsData, searchQuery: string, config: any) {
+  async export(accessToken: string, playlistsData: PlaylistsData, searchQuery: string, config: any, selectedPlaylists: Set<string>) {
     let playlistFileNames = new Set<string>()
     let playlistXlsxExports = new Array<Uint8Array>()
-
-    const playlists = searchQuery === "" ? await playlistsData.all() : await playlistsData.search(searchQuery)
+    const allPlaylists = searchQuery === "" ? await playlistsData.all() : await playlistsData.search(searchQuery)
+    
+    // Si hay playlists seleccionadas, filtramos. Si no, mantenemos el comportamiento original (exportar todas)
+    const playlistsToExport = selectedPlaylists.size > 0 
+      ? allPlaylists.filter((p: any) => selectedPlaylists.has(p.id))
+      : allPlaylists
 
     let doneCount = 0
 
-    for (const playlist of playlists) {
+    for (const playlist of playlistsToExport) {
       this.props.onPlaylistExportStarted(playlist.name, doneCount)
 
       let exporter = new PlaylistExporter(accessToken, playlist, config)
@@ -69,7 +73,8 @@ class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
           this.props.accessToken,
           this.props.playlistsData,
           this.props.searchQuery,
-          this.props.config
+          this.props.config,
+          this.props.selectedPlaylists
         ).catch(apiCallErrorHandler).then(() => {
           this.setState({ exporting: false })
         })
@@ -78,12 +83,15 @@ class PlaylistsExporter extends React.Component<PlaylistsExporterProps> {
   }
 
   render() {
-    const text = this.props.searchQuery === "" ? this.props.i18n.t("export_all") : this.props.i18n.t("export_search_results")
-
+    const count = this.props.selectedPlaylists.size
+    const text = count > 0 
+      ? this.props.i18n.t("export_selected", { count, defaultValue: `Exportar seleccionadas (${count})` })
+      : (this.props.searchQuery === "" ? this.props.i18n.t("export_all") : this.props.i18n.t("export_search_results"))
+    
     return (
       <Button 
         type="submit" 
-        variant="outline-secondary" 
+        variant={count > 0 ? "primary" : "outline-secondary"} 
         size="sm"
         onClick={this.exportPlaylists} 
         className="text-nowrap" 

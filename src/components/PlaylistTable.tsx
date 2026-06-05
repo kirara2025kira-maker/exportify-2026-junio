@@ -1,7 +1,6 @@
 import React from "react"
 import { withTranslation, WithTranslation, Translation } from "react-i18next"
 import { ProgressBar } from "react-bootstrap"
-
 import Bugsnag from "@bugsnag/js"
 import PlaylistsData from "./data/PlaylistsData"
 import ConfigDropdown, { ConfigDropdownRef } from "./ConfigDropdown"
@@ -19,16 +18,16 @@ interface PlaylistTableProps extends WithTranslation {
 
 class PlaylistTable extends React.Component<PlaylistTableProps> {
   PAGE_SIZE = 20
-
   userId?: string
   playlistsData?: PlaylistsData
   configDropdown = React.createRef<ConfigDropdownRef>()
   playlistSearch = React.createRef<PlaylistSearchRef>()
+  selectAllCheckbox = React.createRef<HTMLInputElement>()
 
   state = {
     initialized: false,
     searchQuery: "",
-    playlists: [],
+    playlists: [] as any[],
     playlistCount: 0,
     likedSongs: {
       limit: 0,
@@ -44,15 +43,54 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
       includeArtistsData: false,
       includeAudioFeaturesData: false,
       includeAlbumData: false
-    }
+    },
+    selectedPlaylists: new Set<string>()
   }
 
   constructor(props: PlaylistTableProps) {
     super(props)
-
     if (props.config) {
       this.state.config = props.config
     }
+  }
+
+  componentDidUpdate() {
+    if (this.selectAllCheckbox.current) {
+      this.selectAllCheckbox.current.indeterminate = this.isSomeCurrentPageSelected() && !this.isAllCurrentPageSelected()
+    }
+  }
+
+  isAllCurrentPageSelected = () => {
+    const currentPageIds = this.state.playlists.filter((p: any) => p.uri != null).map((p: any) => p.id)
+    return currentPageIds.length > 0 && currentPageIds.every((id: string) => this.state.selectedPlaylists.has(id))
+  }
+
+  isSomeCurrentPageSelected = () => {
+    const currentPageIds = this.state.playlists.filter((p: any) => p.uri != null).map((p: any) => p.id)
+    return currentPageIds.some((id: string) => this.state.selectedPlaylists.has(id))
+  }
+
+  handleToggleSelect = (playlistId: string) => {
+    const newSelected = new Set(this.state.selectedPlaylists)
+    if (newSelected.has(playlistId)) {
+      newSelected.delete(playlistId)
+    } else {
+      newSelected.add(playlistId)
+    }
+    this.setState({ selectedPlaylists: newSelected })
+  }
+
+  handleToggleSelectAll = () => {
+    const currentPageIds = this.state.playlists.filter((p: any) => p.uri != null).map((p: any) => p.id)
+    const allCurrentPageSelected = this.isAllCurrentPageSelected()
+
+    const newSelected = new Set(this.state.selectedPlaylists)
+    if (allCurrentPageSelected) {
+      currentPageIds.forEach((id: string) => newSelected.delete(id))
+    } else {
+      currentPageIds.forEach((id: string) => newSelected.add(id))
+    }
+    this.setState({ selectedPlaylists: newSelected })
   }
 
   handlePlaylistSearch = async (query: string) => {
@@ -60,7 +98,6 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
       this.handlePlaylistSearchCancel()
       return
     }
-
     const playlists = await this.playlistsData!.search(query).catch(apiCallErrorHandler)
 
     this.setState({
@@ -68,6 +105,7 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
       playlists: playlists,
       playlistCount: playlists!.length,
       currentPage: 1,
+      selectedPlaylists: new Set<string>(), // Limpiar selección en nueva búsqueda
       progressBar: {
         show: false
       }
@@ -82,6 +120,7 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
   }
 
   handlePlaylistSearchCancel = () => {
+    this.setState({ selectedPlaylists: new Set<string>() }) // Limpiar selección al cancelar
     return this.loadCurrentPlaylistPage().catch(apiCallErrorHandler)
   }
 
@@ -89,14 +128,12 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
     if (this.playlistSearch.current) {
       this.playlistSearch.current.clear()
     }
-
     try {
       const playlists = await this.playlistsData!.slice(
         ((this.state.currentPage - 1) * this.PAGE_SIZE),
         ((this.state.currentPage - 1) * this.PAGE_SIZE) + this.PAGE_SIZE
       )
 
-      // FIXME: Handle unmounting
       this.setState(
         {
           initialized: true,
@@ -122,7 +159,6 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
 
   handlePlaylistsLoadingStarted = () => {
     Bugsnag.leaveBreadcrumb("Started exporting all playlists")
-
     this.configDropdown.current!.spin(true)
   }
 
@@ -132,7 +168,6 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
 
   handlePlaylistsExportDone = () => {
     Bugsnag.leaveBreadcrumb("Finished exporting all playlists")
-
     this.setState({
       progressBar: {
         show: true,
@@ -144,7 +179,6 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
 
   handlePlaylistExportStarted = (playlistName: string, doneCount: number) => {
     Bugsnag.leaveBreadcrumb(`Started exporting playlist ${playlistName}`)
-
     this.setState({
       progressBar: {
         show: true,
@@ -156,7 +190,6 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
 
   handleConfigChanged = (config: any) => {
     Bugsnag.leaveBreadcrumb(`Config updated to ${JSON.stringify(config)}`)
-
     this.setState({ config: config })
   }
 
@@ -175,7 +208,6 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
     try {
       const user = await apiCall("https://api.spotify.com/v1/me", this.props.accessToken)
         .then(response => response.data)
-
       Bugsnag.setUser(user.id, user.uri, user.display_name)
 
       this.userId = user.id
@@ -194,7 +226,6 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
 
   render() {
     const progressBar = <ProgressBar striped variant="primary" animated={this.state.progressBar.value < this.state.playlistCount} now={this.state.progressBar.value} max={this.state.playlistCount} label={this.state.progressBar.label} />
-
     if (this.state.initialized) {
       return (
         <div id="playlists">
@@ -208,7 +239,14 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
             <table className="table table-hover table-sm">
               <thead>
                 <tr>
-                  <th className="icon"></th>
+                  <th className="icon">
+                    <input 
+                      type="checkbox" 
+                      checked={this.isAllCurrentPageSelected()}
+                      onChange={this.handleToggleSelectAll}
+                      ref={this.selectAllCheckbox}
+                    />
+                  </th>
                   <th className="name">{this.props.i18n.t("playlist.name")}</th>
                   <th className="owner">{this.props.i18n.t("playlist.owner")}</th>
                   <th className="tracks d-none d-sm-table-cell">{this.props.i18n.t("playlist.tracks")}</th>
@@ -222,18 +260,23 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
                       playlistsData={this.playlistsData!}
                       searchQuery={this.state.searchQuery}
                       config={this.state.config}
+                      selectedPlaylists={this.state.selectedPlaylists}
                     />
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {this.state.playlists.map((playlist: any, i) => {
-                  return <PlaylistRow
-                    playlist={playlist}
-                    key={playlist.id || i}
-                    accessToken={this.props.accessToken}
-                    config={this.state.config}
-                  />
+                  return (
+                    <PlaylistRow
+                      playlist={playlist}
+                      key={playlist.id || i}
+                      accessToken={this.props.accessToken}
+                      config={this.state.config}
+                      isSelected={this.state.selectedPlaylists.has(playlist.id)}
+                      onToggleSelect={this.handleToggleSelect}
+                    />
+                  )
                 })}
               </tbody>
             </table>
@@ -241,7 +284,7 @@ class PlaylistTable extends React.Component<PlaylistTableProps> {
           <div id="playlistsFooter">
             <Paginator currentPage={this.state.currentPage} pageLimit={this.state.searchQuery === "" ? this.PAGE_SIZE : this.state.playlistCount} totalRecords={this.state.playlistCount} onPageChanged={this.handlePageChanged} />
           </div>
-        </div >
+        </div>
       );
     } else {
       return <div className="spinner" data-testid="playlistTableSpinner"></div>
